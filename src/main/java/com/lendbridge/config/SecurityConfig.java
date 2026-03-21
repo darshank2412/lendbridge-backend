@@ -40,7 +40,6 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
                 .requestMatchers(
                     "/auth/otp/send",
                     "/auth/otp/verify",
@@ -51,15 +50,12 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/actuator/**"
                 ).permitAll()
-                // Loan + Savings product listing (any authenticated)
                 .requestMatchers("GET", "/loan-products", "/loan-products/**").authenticated()
                 .requestMatchers("GET", "/savings-products", "/savings-products/**").authenticated()
-                // Admin only
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("POST", "/loan-products", "/savings-products").hasRole("ADMIN")
                 .requestMatchers("PUT", "/loan-products/**", "/savings-products/**").hasRole("ADMIN")
                 .requestMatchers("DELETE", "/loan-products/**", "/savings-products/**").hasRole("ADMIN")
-                // All other requests need authentication
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
@@ -71,9 +67,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-config.setAllowedOrigins(List.of("*"));
-config.setAllowCredentials(false);
-               config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
