@@ -23,6 +23,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -51,6 +55,9 @@ public class OtpService {
     @Value("${twilio.enabled:false}")
     private boolean twilioEnabled;
 
+    @Value("${fast2sms.api.key:disabled}")
+    private String fast2smsKey;
+
     @Value("${otp.expiry-minutes:10}")
     private int otpExpiryMinutes;
 
@@ -75,7 +82,6 @@ public class OtpService {
         String otp = generateOtp();
         String identifier = request.getIdentifier();
 
-        // Store BCrypt hash of OTP - BCrypt output is always 60 chars
         OtpRecord record = OtpRecord.builder()
                 .identifier(identifier)
                 .otpCode(passwordEncoder.encode(otp))
@@ -92,11 +98,9 @@ public class OtpService {
             log.info("EMAIL OTP for {} -> {}", identifier, otp);
         }
 
-        // DEV MODE: return OTP in response so frontend can display it
-        // In production (twilio.enabled=true) this line is never reached
-        if (!twilioEnabled) {
+        if (!twilioEnabled && "disabled".equals(fast2smsKey)) {
             return "DEV MODE - Your OTP is: " + otp
-                    + " (This will not appear when Twilio is enabled)";
+                    + " (This will not appear when SMS is enabled)";
         }
 
         return "OTP sent successfully to " + maskIdentifier(identifier);
@@ -121,7 +125,6 @@ public class OtpService {
         record.setUsed(true);
         otpRepository.save(record);
 
-        // Create user shell on first OTP verification, or fetch existing user
         Optional<User> existing = userRepository.findByPhoneNumber(request.getIdentifier());
         User user;
         if (existing.isPresent()) {
@@ -150,6 +153,9 @@ public class OtpService {
 
     private void sendSms(String phone, String countryCode, String otp) {
         String fullNumber = (countryCode != null ? countryCode : "+91") + phone;
+        String indianNumber = fullNumber.startsWith("+91")
+                ? fullNumber.substring(3) : phone;
+
         if (twilioEnabled) {
             try {
                 Message.creator(
@@ -159,15 +165,42 @@ public class OtpService {
                                 + ". Valid for " + otpExpiryMinutes
                                 + " minutes. Do not share."
                 ).create();
-                log.info("SMS sent to {}", fullNumber);
+                log.info("SMS sent via Twilio to {}", fullNumber);
             } catch (Exception e) {
-                log.error("SMS send failed for {}: {}", fullNumber, e.getMessage());
-                log.info("FALLBACK OTP for {} -> {}", fullNumber, otp);
+                log.error("Twilio failed for {}: {}", fullNumber, e.getMessage());
+                sendViaFast2Sms(indianNumber, otp);
             }
+        } else if (!"disabled".equals(fast2smsKey)) {
+            sendViaFast2Sms(indianNumber, otp);
         } else {
             log.info("==================================");
             log.info("  DEV OTP for {} -> {}", fullNumber, otp);
             log.info("==================================");
+        }
+    }
+
+    private void sendViaFast2Sms(String indianNumber, String otp) {
+        try {
+            String url = "https://www.fast2sms.com/dev/bulkV2"
+                    + "?authorization=" + fast2smsKey
+                    + "&variables_values=" + otp
+                    + "&route=otp"
+                    + "&numbers=" + indianNumber;
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("cache-control", "no-cache")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(
+                    request, HttpResponse.BodyHandlers.ofString());
+
+            log.info("Fast2SMS response for {}: {}", indianNumber, response.body());
+        } catch (Exception ex) {
+            log.error("Fast2SMS also failed: {}", ex.getMessage());
+            log.info("FALLBACK OTP -> {}", otp);
         }
     }
 
