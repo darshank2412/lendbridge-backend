@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import com.lendbridge.service.LoanAgreementService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import java.util.List;
 
 @RestController
@@ -22,6 +24,7 @@ public class LoanController {
 
     private final LoanService loanService;
     private final CreditScoreService creditScoreService;
+private final LoanAgreementService loanAgreementService;
 
     // ── Week 5: Disbursement ──────────────────────────────
 
@@ -105,4 +108,14 @@ public class LoanController {
             @PathVariable Long userId) {
         return ResponseEntity.ok(ApiResponse.success(creditScoreService.getScore(userId)));
     }
+
+@GetMapping("/loans/{loanId}/agreement")
+@Operation(summary = "Download loan agreement PDF")
+public ResponseEntity<byte[]> downloadAgreement(@PathVariable Long loanId) throws Exception {
+    byte[] pdf = loanAgreementService.generateAgreement(loanId);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=LoanAgreement-" + loanId + ".pdf")
+        .contentType(MediaType.APPLICATION_PDF)
+        .body(pdf);
+}
 }
