@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.itextpdf.text.pdf.draw.LineSeparator;
 
 @Service
 @RequiredArgsConstructor
