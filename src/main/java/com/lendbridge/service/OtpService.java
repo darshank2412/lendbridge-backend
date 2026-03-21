@@ -82,6 +82,17 @@ public class OtpService {
         String otp = generateOtp();
         String identifier = request.getIdentifier();
 
+        // Block OTP if user already fully registered
+        if (request.getPurpose() == OtpPurpose.REGISTRATION) {
+            userRepository.findByPhoneNumber(identifier).ifPresent(existing -> {
+                if (existing.getStatus() == UserStatus.REGISTRATION_COMPLETE
+                        || existing.getStatus() == UserStatus.PLATFORM_ACCOUNT_CREATED) {
+                    throw LendbridgeException.conflict(
+                            "This number is already registered. Please login instead.");
+                }
+            });
+        }
+
         OtpRecord record = OtpRecord.builder()
                 .identifier(identifier)
                 .otpCode(passwordEncoder.encode(otp))
