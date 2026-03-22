@@ -87,7 +87,7 @@ public class KycService {
                 .anyMatch(d -> d.getDocumentType() == DocumentType.PAN
                         && d.getStatus() == DocumentStatus.VERIFIED);
 
-        if (hasVerifiedAadhaar && hasVerifiedPan) {
+        if (hasVerifiedAadhaar || hasVerifiedPan) {
             user.setKycStatus(KycStatus.VERIFIED);
             userRepository.save(user);
         }
