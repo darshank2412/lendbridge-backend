@@ -78,7 +78,7 @@ public class User implements UserDetails {
     @Column(unique = true, length = 20)
     private String platformAccountNumber;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "address_id")
     private Address address;
 
