@@ -68,9 +68,10 @@ public class OtpService {
         if (twilioEnabled) {
             try {
                 Twilio.init(accountSid, authToken);
-                log.info("Twilio initialized");
+                log.info("Twilio initialized successfully");
             } catch (Exception e) {
-                log.warn("Twilio init failed - using console OTP mode: {}", e.getMessage());
+                log.warn("Twilio init failed - falling back to console OTP mode: {}", e.getMessage());
+                twilioEnabled = false;
             }
         } else {
             log.info("Twilio disabled - OTP will be printed to console (dev mode)");
