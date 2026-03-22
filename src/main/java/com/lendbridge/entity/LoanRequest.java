@@ -1,5 +1,6 @@
 package com.lendbridge.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.lendbridge.enums.LoanPurpose;
 import com.lendbridge.enums.LoanStatus;
 import jakarta.persistence.*;
@@ -16,10 +17,12 @@ public class LoanRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnoreProperties({"loanRequests", "kycDocuments", "bankAccounts", "password", "authorities"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "borrower_id", nullable = false)
     private User borrower;
 
+    @JsonIgnoreProperties({"loanRequests", "lender", "borrower"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -43,7 +46,7 @@ public class LoanRequest {
 
     private String rejectionReason;
 
-    // Lender who accepted this request (Week 4 matchmaking)
+    @JsonIgnoreProperties({"loanRequests", "kycDocuments", "bankAccounts", "password", "authorities"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accepted_by_lender_id")
     private User acceptedByLender;
