@@ -33,17 +33,17 @@ public class BankAccount {
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @JsonIgnoreProperties({"bankAccounts", "kycDocuments", "loanRequests", "password", "authorities"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @JsonIgnoreProperties({"bankAccounts"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "savings_product_id")
     private SavingsProduct savingsProduct;
 
     @JsonIgnoreProperties({"bankAccounts", "loanRequests"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_product_id")
     private LoanProduct loanProduct;
 

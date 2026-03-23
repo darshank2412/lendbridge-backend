@@ -18,12 +18,12 @@ public class LoanRequest {
     private Long id;
 
     @JsonIgnoreProperties({"loanRequests", "kycDocuments", "bankAccounts", "password", "authorities"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "borrower_id", nullable = false)
     private User borrower;
 
     @JsonIgnoreProperties({"loanRequests", "lender", "borrower"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
 
@@ -47,7 +47,7 @@ public class LoanRequest {
     private String rejectionReason;
 
     @JsonIgnoreProperties({"loanRequests", "kycDocuments", "bankAccounts", "password", "authorities"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accepted_by_lender_id")
     private User acceptedByLender;
 

@@ -18,12 +18,12 @@ public class LenderPreference {
     private Long id;
 
     @JsonIgnoreProperties({"lenderPreferences", "kycDocuments", "bankAccounts", "loanRequests", "password", "authorities"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "lender_id", nullable = false)
     private User lender;
 
     @JsonIgnoreProperties({"lenderPreferences", "loanRequests", "bankAccounts"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
 
