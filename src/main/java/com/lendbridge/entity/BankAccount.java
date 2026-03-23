@@ -1,5 +1,6 @@
 package com.lendbridge.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.lendbridge.enums.AccountStatus;
 import com.lendbridge.enums.AccountType;
 import jakarta.persistence.*;
@@ -31,14 +32,17 @@ public class BankAccount {
     @Builder.Default
     private AccountStatus status = AccountStatus.ACTIVE;
 
+    @JsonIgnoreProperties({"bankAccounts", "kycDocuments", "loanRequests", "password", "authorities"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @JsonIgnoreProperties({"bankAccounts"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "savings_product_id")
     private SavingsProduct savingsProduct;
 
+    @JsonIgnoreProperties({"bankAccounts", "loanRequests"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_product_id")
     private LoanProduct loanProduct;

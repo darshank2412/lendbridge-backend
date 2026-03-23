@@ -30,6 +30,7 @@ public class LenderPreferenceController {
     }
 
     @GetMapping("/my")
+    @PreAuthorize("hasRole('LENDER')")
     @Operation(summary = "LENDER — Get all my preferences (one per loan product)")
     public ResponseEntity<ApiResponse<List<LenderPreferenceResponse>>> getMyPreferences(
             @RequestParam Long lenderId) {
@@ -37,6 +38,7 @@ public class LenderPreferenceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('LENDER')")
     @Operation(summary = "LENDER — Save or update preference for a loan product")
     public ResponseEntity<ApiResponse<LenderPreferenceResponse>> savePreference(
             @RequestParam Long lenderId,
@@ -46,6 +48,7 @@ public class LenderPreferenceController {
     }
 
     @PatchMapping("/deactivate")
+    @PreAuthorize("hasRole('LENDER')")
     @Operation(summary = "LENDER — Deactivate preference for a specific loan product")
     public ResponseEntity<ApiResponse<LenderPreferenceResponse>> deactivate(
             @RequestParam Long lenderId,
