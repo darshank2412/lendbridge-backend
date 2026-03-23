@@ -1,5 +1,6 @@
 package com.lendbridge.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.lendbridge.enums.RiskAppetite;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lender_preferences",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"lender_id", "loan_product_id"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"lender_id", "loan_product_id"}))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class LenderPreference {
 
@@ -16,10 +17,12 @@ public class LenderPreference {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnoreProperties({"lenderPreferences", "kycDocuments", "bankAccounts", "loanRequests", "password", "authorities"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lender_id", nullable = false)
     private User lender;
 
+    @JsonIgnoreProperties({"lenderPreferences", "loanRequests", "bankAccounts"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
